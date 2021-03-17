@@ -36,7 +36,7 @@ class AjaxRequest {
                     config.headers["Content-Type"] = "application/json";
                 }
                 if (Object.keys(this.queue).length === 0) {
-                    // TODO: something...
+                   
                 }
                 // token处理
                 const token = store.state.token
@@ -55,7 +55,7 @@ class AjaxRequest {
                 // 从队列中删除请求
                 delete this.queue[url];
                 if (Object.keys(this.queue).length === 0) {
-                    // TODO: something...
+                    
                 }
 
                 if (res.status === 200) {
