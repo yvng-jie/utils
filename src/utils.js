@@ -1,819 +1,686 @@
-// ======================================= 时间格式化函数 ==============================================
 /**
- * 作用: 格式化时间 
- * @param {String: date}
- * @return 2019-10-28 16:44:30 (格式化后的时间字符串)
- * 
+ * Utility functions — A collection of common JavaScript utilities
+ *
+ * @Author: Jie.Yang
+ * @Date: 2020-09
+ * @Refactored: 2026-05
+ */
+
+// ======================================= Time Formatting =============================================
+
+/**
+ * Format a date string to "YYYY-MM-DD HH:mm:ss" format
+ * @param {string} date - Date string, e.g. "2019-10-28"
+ * @returns {string} Formatted date string
  */
 function formatDate(date) {
-    if (date && typeof date === 'string') {
-        date = date.replace(/(-|\.)/g, '/');
-        date = new Date(date);
-    } else {
-        const promptMst = '"2019-1-12 12:2:23"';
-        throw TypeError(`Must be a String like ${promptMst}`);
-    }
+  if (date && typeof date === 'string') {
+    date = date.replace(/(-|\.)/g, '/')
+    date = new Date(date)
+  } else {
+    throw TypeError('Must be a String like "2019-1-12 12:2:23"')
+  }
 
-    function zero(val) {
-        return val < 10 ? '0' + val : val;
-    }
-    const formatDate = {
-        year: date.getFullYear() + '-',
-        mon: zero(date.getMonth() + 1) + '-',
-        day: zero(date.getDate()) + ' ',
-        hour: zero(date.getHours()) + ':',
-        minute: zero(date.getMinutes()) + ':',
-        senc: zero(date.getSeconds())
-    };
+  const zero = (val) => (val < 10 ? '0' + val : val)
 
-    return formatDate.year + formatDate.mon + formatDate.day +
-        formatDate.hour + formatDate.minute + formatDate.senc;
+  return (
+    date.getFullYear() +
+    '-' +
+    zero(date.getMonth() + 1) +
+    '-' +
+    zero(date.getDate()) +
+    ' ' +
+    zero(date.getHours()) +
+    ':' +
+    zero(date.getMinutes()) +
+    ':' +
+    zero(date.getSeconds())
+  )
 }
 
-// ======================================= 对象操作 ==============================================
+// ======================================= Object Operations ===========================================
+
 /**
- * 作用: 对象深度克隆
- * @param: [Object source]
- * @return newObject
- *
+ * Deep clone an object or array
+ * @param {Object|Array} source - Source to clone
+ * @returns {Object|Array} Cloned copy
  */
 function objDeepCopy(source) {
-    let sourceCopy = source instanceof Array ? [] : {};
-    for (let item in source) {
-        if (source.hasOwnProperty(item)) {
-            sourceCopy[item] = typeof source[item] === 'object' ?
-                objDeepCopy(source[item]) : source[item];
-        }
+  const sourceCopy = source instanceof Array ? [] : {}
+  for (const item in source) {
+    if (Object.prototype.hasOwnProperty.call(source, item)) {
+      sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item]
     }
-    return sourceCopy;
-};
+  }
+  return sourceCopy
+}
 
-// ======================================= 环境/设备/浏览器判断 ==============================================
+// ======================================= Environment / Device Detection ===============================
+
 /**
- * 作用: 判断js执行环境
- * @param: window
- * @return String
- *
- * */
+ * Check if running in browser or Node.js
+ * @returns {string} 'Browser' or 'Node'
+ */
 function isJavaScript() {
-    if (typeof (window) === "undefined") {
-        return "Node";
-    }
-
-    return "Browser";
+  return typeof window === 'undefined' ? 'Node' : 'Browser'
 }
 
 /**
- * 作用: 判断是移动还是PC设备
- * @param: { Null } 
- * @return { String } 
+ * Check if device is mobile or desktop
+ * @returns {string} 'mobile' or 'desktop'
  */
 function isMobile() {
-  if ((navigator.userAgent.match(/(iPhone|iPod|Android|ios|iOS|iPad|Backerry|WebOS|Symbian|Windows Phone|Phone)/i))) {
-  return 'mobile';
-  }
-  return 'desktop';
+  return /iPhone|iPod|Android|ios|iOS|iPad|Backerry|WebOS|Symbian|Windows Phone|Phone/i.test(navigator.userAgent)
+    ? 'mobile'
+    : 'desktop'
 }
 
 /**
- * 作用: 判断是否是苹果还是安卓移动设备
- * @param: { Null } 
- * @return { Boolean } 
+ * Check if device is Apple mobile (iPhone, iPad, iPod)
+ * @returns {boolean}
  */
 function isAppleMobileDevice() {
-  let reg = /iphone|ipod|ipad|Macintosh/i;
-  return reg.test(navigator.userAgent.toLowerCase());
+  return /iphone|ipod|ipad|Macintosh/i.test(navigator.userAgent.toLowerCase())
 }
 
 /**
- * 作用: 判断是否是安卓移动设备
- * @param: { Null } 
- * @return { Boolean } 
+ * Check if device is Android
+ * @returns {boolean}
  */
 function isAndroidMobileDevice() {
-    return /android/i.test(navigator.userAgent.toLowerCase());
+  return /android/i.test(navigator.userAgent.toLowerCase())
 }
 
 /**
- * 作用: 判断是Windows还是Mac系统
- * @param: { Null } 
- * @return { Boolean } 
+ * Detect OS type: Windows or Mac
+ * @returns {string} 'windows', 'mac', or 'unknown'
  */
-function isAndroidMobileDevice() {
-    const agent = navigator.userAgent.toLowerCase();
-    const isMac = /macintosh|mac os x/i.test(navigator.userAgent);
-   const isWindows = agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0 || agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0;
-    if (isWindows) {
-        return "windows";
-    }
-    if(isMac){
-        return "mac";
-    }
+function getOS() {
+  const ua = navigator.userAgent.toLowerCase()
+  if (/win64|wow64|win32|wow32/i.test(ua)) return 'windows'
+  if (/macintosh|mac os x/i.test(navigator.userAgent)) return 'mac'
+  return 'unknown'
 }
 
 /**
- * 作用: 判断是否是微信/QQ内置浏览器
- * @param: { Null } 
- * @return { Boolean } 
+ * Detect built-in browser (WeChat / QQ)
+ * @returns {string|false} 'weixin', 'QQ', or false
  */
-function isAndroidMobileDevice() {
-    const ua = navigator.userAgent.toLowerCase();
-    if (ua.match(/MicroMessenger/i) == "micromessenger") {
-        return "weixin";
-    } else if (ua.match(/QQ/i) == "qq") {
-        return "QQ";
-    }
-    return false;
+function getBuiltInBrowser() {
+  const ua = navigator.userAgent.toLowerCase()
+  if (ua.includes('micromessenger')) return 'weixin'
+  if (ua.includes('qq')) return 'QQ'
+  return false
 }
 
 /**
- * 作用: 浏览器型号和版本
- * @param: { Null } 
- * @return { Boolean } 
+ * Detect browser type and version
+ * @returns {Object} { type: string, version: number }
  */
-function isAndroidMobileDevice() {
-    let t = navigator.userAgent.toLowerCase();
-    return 0 <= t.indexOf("msie") ? { //ie < 11
-        type: "IE",
-        version: Number(t.match(/msie ([\d]+)/)[1])
-    } : !!t.match(/trident\/.+?rv:(([\d.]+))/) ? { // ie 11
-        type: "IE",
-        version: 11
-    } : 0 <= t.indexOf("edge") ? {
-        type: "Edge",
-        version: Number(t.match(/edge\/([\d]+)/)[1])
-    } : 0 <= t.indexOf("firefox") ? {
-        type: "Firefox",
-        version: Number(t.match(/firefox\/([\d]+)/)[1])
-    } : 0 <= t.indexOf("chrome") ? {
-        type: "Chrome",
-        version: Number(t.match(/chrome\/([\d]+)/)[1])
-    } : 0 <= t.indexOf("opera") ? {
-        type: "Opera",
-        version: Number(t.match(/opera.([\d]+)/)[1])
-    } : 0 <= t.indexOf("Safari") ? {
-        type: "Safari",
-        version: Number(t.match(/version\/([\d]+)/)[1])
-    } : {
-        type: t,
-        version: -1
-    }
+function getBrowserInfo() {
+  const t = navigator.userAgent.toLowerCase()
+
+  if (t.includes('msie')) {
+    return { type: 'IE', version: Number(t.match(/msie ([\d]+)/)[1]) }
+  }
+  if (/trident\/.+?rv:(([\d.]+))/.test(t)) {
+    return { type: 'IE', version: 11 }
+  }
+  if (t.includes('edge')) {
+    return { type: 'Edge', version: Number(t.match(/edge\/([\d]+)/)[1]) }
+  }
+  if (t.includes('firefox')) {
+    return { type: 'Firefox', version: Number(t.match(/firefox\/([\d]+)/)[1]) }
+  }
+  if (t.includes('chrome')) {
+    return { type: 'Chrome', version: Number(t.match(/chrome\/([\d]+)/)[1]) }
+  }
+  if (t.includes('opera')) {
+    return { type: 'Opera', version: Number(t.match(/opera.([\d]+)/)[1]) }
+  }
+  if (t.includes('safari')) {
+    return { type: 'Safari', version: Number(t.match(/version\/([\d]+)/)[1]) }
+  }
+  return { type: t, version: -1 }
 }
 
-// ======================================= URL操作 ==============================================
+// ======================================= URL Operations ===============================================
+
 /**
- * 作用: 获取通用查询字符串参数
- *  @param: null
- *  @return Object
- * 
+ * Parse URL query string into an object
+ * @returns {Object} Key-value pairs from query string
  */
 function getQueryStringArgs() {
-    var qs = location.search.length > 0 ? location.search.substring(1) : "",
-        args = {},
-        items = qs.length ? qs.split("&") : [],
-        item = null,
-        name = null,
-        value = null,
-        i = 0,
-        len = items.length;
+  const qs = location.search.length > 0 ? location.search.substring(1) : ''
+  const args = {}
+  if (!qs) return args
 
-    for (i = 0; i < len; i++) {
-        item = items[i].split("=");
-        name = decodeURIComponent(items[0]);
-        value = decodeURIComponent(items[1]);
-
-        if (name.length) {
-            args[name] = value;
-        }
+  qs.split('&').forEach((item) => {
+    const [name, value] = item.split('=')
+    if (name) {
+      args[decodeURIComponent(name)] = decodeURIComponent(value || '')
     }
-
-    return args;
+  })
+  return args
 }
 
 /**
- * 作用: 检测URL是否有效
- *  @param: { String }
- *  @return { Boolean }
- * 
- */
-function getUrlState(URL) {
-  let xmlhttp = new ActiveXObject("microsoft.xmlhttp");
-  xmlhttp.Open("GET", URL, false);
-  try {
-    xmlhttp.Send();
-  } catch (e) {
-  } finally {
-    let result = xmlhttp.responseText;
-    if (result) {
-      if (xmlhttp.Status == 200) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-}
-
-/**
- * 作用: 键值对拼接成URL参数
- *  @param: { Object }
- *  @return { Boolean }
- * 
+ * Convert an object to URL query string
+ * @param {Object} obj - Key-value pairs
+ * @returns {string} URL-encoded query string
  */
 function params2Url(obj) {
-     let params = []
-     for (let key in obj) {
-       params.push(`${key}=${obj[key]}`);
-     }
-     return encodeURIComponent(params.join('&'))
+  const params = Object.entries(obj).map(([k, v]) => `${k}=${v}`)
+  return encodeURIComponent(params.join('&'))
 }
 
 /**
- * 作用: 删除URL中指定参数
- *  @param: { String }
- *  @return { String }
- * 
+ * Delete a parameter from the current URL
+ * @param {string} name - Parameter name to remove
+ * @returns {string} New URL without the parameter
  */
 function funcUrlDel(name) {
-  const baseUrl = location.origin + location.pathname + "?";
-  const query = location.search.substr(1);
-  if (query.indexOf(name) > -1) {
-    const obj = {};
-    const arr = query.split("&");
-    for (let i = 0; i < arr.length; i++) {
-      arr[i] = arr[i].split("=");
-      obj[arr[i][0]] = arr[i][1];
-    }
-    delete obj[name];
-    return baseUrl + JSON.stringify(obj).replace(/[\"\{\}]/g,"").replace(/\:/g,"=").replace(/\,/g,"&");
-  }
+  const baseUrl = location.origin + location.pathname + '?'
+  const query = location.search.substr(1)
+  if (!query.includes(name)) return location.href
+
+  const obj = {}
+  query.split('&').forEach((pair) => {
+    const [k, v] = pair.split('=')
+    obj[k] = v
+  })
+  delete obj[name]
+  return (
+    baseUrl +
+    JSON.stringify(obj)
+      .replace(/[\"\{\}]/g, '')
+      .replace(/\:/g, '=')
+      .replace(/\,/g, '&')
+  )
 }
 
-// ======================================= 字符串操作 ==============================================
-/**
- * 作用: 获取随机数字+字母组成的n位验证码
- * @param {n} Number    参数是位数
- * @return {tem} String  返回随机字符串
- */
-function randomString(n) {
-    let str = 'abcdefghijklmnopqrstuvwxyz9876543210';
-    let tmp = '',
-        i = 0,
-        l = str.length;
-    for (i = 0; i < n; i++) {
-        tmp += str.charAt(Math.floor(Math.random() * l));
-    }
-    return tmp;
-}
+// ======================================= String Operations ============================================
 
 /**
- * 作用: 获取随机数字+字母组成的n位验证码
- * @param {len} Number 参数是位数
- * @return {str} String 返回随机后的字符串
- */
-function getRandomStr(len) {
-    var str = "";
-    for (; str.length < len; str += Math.random().toString(36).substr(2));
-    return str.substr(0, len);
-}
-
-/**
- * 作用: 获取字符串中出现次数最多的字母和出现的次数
- * @param {str} 传入的字符串
- * @return {Object} 返回出现最多的字母和出现的次数
- */
-function getStr(str) {
-    if (typeof str !== 'string') return false
-
-    let obj = {}
-    let arr = str.split('')
-
-    for (let i = 0; i < arr.length; i++) {
-        let char = arr[i]
-        obj[char] = obj[char] || 0
-        obj[char] += 1
-    }
-
-    let maxChar
-    let maxNum = 0
-
-    for (let key in obj) {
-        if (obj[key] > maxNum) {
-            maxChar = key
-            maxNum = obj[key]
-        }
-    }
-    return { maxChar, maxNum }
-}
-
-/**
- * 作用: 生成随机字符串
- * @param: { Number } 随机生成的字符串长度 
- * @return { String } 字符串
+ * Generate a random alphanumeric string
+ * @param {number} len - Length of the string
+ * @returns {string} Random string
  */
 function randomString(len) {
-    let chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz123456789';
-    let strLen = chars.length;
-    let randomStr = '';
-    for (let i = 0; i < len; i++) {
-        randomStr += chars.charAt(Math.floor(Math.random() * strLen));
-    }
-    return randomStr;
+  const chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz123456789'
+  let result = ''
+  for (let i = 0; i < len; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return result
 }
 
 /**
- * 作用: 字符串首字母大写
- * @param: { String }  
- * @return { String } 
+ * Generate a random string using Math.random base-36 conversion
+ * @param {number} len - Length of the string
+ * @returns {string} Random string
  */
-function fistLetterUpper(len) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+function getRandomStr(len) {
+  let str = ''
+  for (; str.length < len; str += Math.random().toString(36).substr(2));
+  return str.substr(0, len)
 }
 
-// ======================================= 数组操作 ==============================================
 /**
- * 作用: 数组套对象根据id去重，然后合并其他属性
- *
- * @param {arr} 需要处理的数组
- * @return {arr}} 处理好的新书组
- * 
- * let arr = [{ price: 300, id: 1 }, { price: 350, id: 1 }, { price: 200, id: 2 }, { price: 250, id: 2 }, { price: 500, id: 3 }]
- * return newArr = [{ price: [300, 350], id: 1 },{ price: [200, 250], id: 2 },{ price: 500, id: 3 }]
+ * Find the most frequent character in a string
+ * @param {string} str - Input string
+ * @returns {Object|false} { maxChar, maxNum } or false if input is invalid
+ */
+function getMostFrequentChar(str) {
+  if (typeof str !== 'string') return false
+
+  const obj = {}
+  for (const char of str) {
+    obj[char] = (obj[char] || 0) + 1
+  }
+
+  let maxChar = ''
+  let maxNum = 0
+  for (const [char, count] of Object.entries(obj)) {
+    if (count > maxNum) {
+      maxChar = char
+      maxNum = count
+    }
+  }
+  return { maxChar, maxNum }
+}
+
+/**
+ * Capitalize the first letter of a string
+ * @param {string} str - Input string
+ * @returns {string} String with first letter uppercased
+ */
+function firstLetterUpper(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+// ======================================= Array Operations =============================================
+
+/**
+ * Merge array items by id, combining price into an array
+ * @param {Array} arr - Array of objects with id and price
+ * @returns {Array} Merged array
  */
 function mergeArr(arr) {
-    let newArr = [];
-    arr.forEach(item => {
-        if (newArr.length > 0) {
-            let filtervalue = newArr.filter(v => {
-                return v.id === item.id;
-            })
-            if (filtervalue.length > 0) {
-                newArr.forEach(n => {
-                    if (n.id === filtervalue[0].id) {
-                        n.price = [filtervalue[0].price, item.price]
-                    }
-                })
-            } else {
-                newArr.push(item)
-            }
-        } else {
-            newArr.push(item)
-        }
-    })
-    return newArr;
+  const newArr = []
+  arr.forEach((item) => {
+    const existing = newArr.find((n) => n.id === item.id)
+    if (existing) {
+      existing.price = Array.isArray(existing.price) ? [...existing.price, item.price] : [existing.price, item.price]
+    } else {
+      newArr.push({ ...item })
+    }
+  })
+  return newArr
 }
 
 /**
- * 作用: 数组降维
- * @param: { Array } 数组
- * @return { Aaary } 降维后的数组
+ * Flatten a nested array
+ * @param {Array} arr - Nested array
+ * @returns {Array} Flattened array
  */
 function flatten(arr) {
-    return [].concat(
-        ...arr.map(x => {
-            Array.isArray(x) ? flatten(x) : x;
-        })
-    )
+  return [].concat(...arr.map((x) => (Array.isArray(x) ? flatten(x) : x)))
 }
 
 /**
- * 作用: 数组乱序
- * @param: { Array } 
- * @return { Array } 乱序后的数组
+ * Shuffle an array (Fisher-Yates algorithm)
+ * @param {Array} arr - Array to shuffle
+ * @returns {Array} Shuffled array
  */
 function arrScrambling(arr) {
-    for (let i = 0; i < arr.length; i++) {
-      const randomIndex = Math.round(Math.random() * (arr.length - 1 - i)) + i;
-      [arr[i], arr[randomIndex]] = [arr[randomIndex], arr[i]];
-    }
-    return arr;
+  for (let i = 0; i < arr.length; i++) {
+    const randomIndex = Math.round(Math.random() * (arr.length - 1 - i)) + i
+    ;[arr[i], arr[randomIndex]] = [arr[randomIndex], arr[i]]
+  }
+  return arr
 }
 
 /**
- * 作用: 数组中获取随机数
- * @param: { Array } 
- * @return { Number } item
+ * Get a random element from an array
+ * @param {Array} arr - Input array
+ * @returns {*} Random element
  */
 function sample(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(Math.random() * arr.length)]
 }
 
-// ======================================= 节流防抖 ==============================================
+// ======================================= Throttle & Debounce =========================================
+
 /**
- * 作用： 函数节流
- * @param: { fn } 一个函数
- * @param: { delay } 一个时间段
- * 示例1: 滚动事件
- * 示例2: 过滤掉重复的验证事件（用户输入停止300ms后开启验证）
+ * Throttle a function (limit execution rate)
+ * @param {Function} fn - Function to throttle
+ * @param {number} delay - Minimum interval in ms (default: 60)
+ * @returns {Function} Throttled function
  */
 function throttle(fn, delay = 60) {
-    let lock = false;
-    return (...args) => {
-        if (lock) {
-            return
-        }
-        fn(...args);
-        lock = true;
-        setTimeout(() => {
-            lock = false;
-        }, delay);
-    }
-}
-function throttle(fn, delay = 300, I = null) {
-    return (...args) => {
-        clearInterval(I);
-        I = setTimeout(fn.bind(null, ...args), delay);
-    }
+  let lock = false
+  return (...args) => {
+    if (lock) return
+    fn(...args)
+    lock = true
+    setTimeout(() => {
+      lock = false
+    }, delay)
+  }
 }
 
-// ======================================= 数据类型检测 ==============================================
 /**
- * 作用: 数据类型检测
- * @param: { data } 任意数据
- * @return data type 
+ * Debounce a function (delay execution until after a pause)
+ * @param {Function} fn - Function to debounce
+ * @param {number} delay - Wait time in ms (default: 300)
+ * @returns {Function} Debounced function
+ */
+function debounce(fn, delay = 300) {
+  let timer = null
+  return (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// ======================================= Type Detection ===============================================
+
+/**
+ * Detect the data type of a value
+ * @param {*} data - Any value
+ * @returns {string} Type name in lowercase
  */
 function typeCheck(data) {
-    const toString = Object.prototype.toString;
-    const dataType = (
-        data instanceof Element
-            ? 'element'
-            : toString.call(data)
-                .replace(/\[object\s(.+)\]/, '$1')
-                .toLowerCase()
-    )
-    return dataType;
+  if (data instanceof Element) return 'element'
+  return Object.prototype.toString
+    .call(data)
+    .replace(/\[object\s(.+)\]/, '$1')
+    .toLowerCase()
 }
 
-// ======================================= 数字操作 ==============================================
+// ======================================= Number Operations ============================================
+
 /**
- * 作用: 生成指定范围内的随机数
- * @param: { Number } 
- * @return 随机数
+ * Generate a random integer in a range [min, max]
+ * @param {number} min - Minimum value
+ * @param {number} max - Maximum value
+ * @returns {number} Random integer
  */
 function randomNum(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
 /**
- * 作用: 数字千分位分隔
- * @param: { Number } 
- * @return { String } 分割好的字符串
+ * Format a number with thousands separators
+ * @param {number} n - Number to format
+ * @returns {string} Formatted string
  */
-function format(n) {
-    let num = n.toString();
-    let len = num.length;
-    if(len <= 3) {
-        return num;
-    } else {
-        let temp = ''
-        let remainder = len % 3;
-        if(remainder > 0 ) {
-            // 不是3的整倍数
-            return num.slice(0, remainder) + ',' + num.slice(remainder, len).match(/\d{3}/g).join(',') + temp;
-        } else {
-            // 是3的整倍数
-             return num.slice(0, len).match(/\d{3}/g).join(',') + temp; 
-        }
-    }
+function formatNumber(n) {
+  const num = n.toString()
+  const len = num.length
+  if (len <= 3) return num
+
+  const remainder = len % 3
+  const parts = num.slice(remainder, len).match(/\d{3}/g)
+  if (remainder > 0) {
+    return num.slice(0, remainder) + ',' + parts.join(',')
+  }
+  return parts.join(',')
 }
 
-// ======================================= 工具类 ==============================================
+// ======================================= Utility Functions ============================================
+
 /**
- * 作用: 手机号中间四位变成*
- * @param: { Number | String }  
- * @return { String } 
+ * Mask the middle 4 digits of a phone number
+ * @param {number|string} tel - Phone number
+ * @returns {string} Masked phone number (e.g. 138****1234)
  */
 function telFormat(tel) {
-    typeof tel !== 'string' ? String(tel) : null; 
-    return tel.substr(0,3) + "****" + tel.substr(7);
+  const s = String(tel)
+  return s.substr(0, 3) + '****' + s.substr(7)
 }
 
 /**
- * 作用: 驼峰命名转换成短横线命名
- * @param: { String }  
- * @return { String } 
+ * Convert camelCase to kebab-case
+ * @param {string} str - camelCase string
+ * @returns {string} kebab-case string
  */
 function getKebabCase(str) {
-    return str.replace(/[A-Z]/g, (item) => '-' + item.toLowerCase())
+  return str.replace(/[A-Z]/g, (item) => '-' + item.toLowerCase())
 }
 
 /**
- * 作用: 短横线命名转换成驼峰命名
- * @param: { String }  
- * @return { String } 
+ * Convert kebab-case to camelCase
+ * @param {string} str - kebab-case string
+ * @returns {string} camelCase string
  */
 function getCamelCase(str) {
-    return str.replace( /-([a-z])/g, (i, item) => item.toUpperCase())
+  return str.replace(/-([a-z])/g, (_i, item) => item.toUpperCase())
 }
 
 /**
- * 作用: 全角转换为半角
- * @param: { String }  
- * @return { String } 
+ * Convert full-width characters to half-width
+ * @param {string} str - Full-width string
+ * @returns {string} Half-width string
  */
 function toCDB(str) {
-  let result = "";
+  let result = ''
   for (let i = 0; i < str.length; i++) {
-    code = str.charCodeAt(i);
+    const code = str.charCodeAt(i)
     if (code >= 65281 && code <= 65374) {
-      result += String.fromCharCode(str.charCodeAt(i) - 65248);
-    } else if (code == 12288) {
-      result += String.fromCharCode(str.charCodeAt(i) - 12288 + 32);
+      result += String.fromCharCode(code - 65248)
+    } else if (code === 12288) {
+      result += String.fromCharCode(code - 12288 + 32)
     } else {
-      result += str.charAt(i);
+      result += str.charAt(i)
     }
   }
-  return result;
+  return result
 }
 
 /**
- * 作用: 半角转换为全角
- * @param: { String }  
- * @return { String } 
+ * Convert half-width characters to full-width
+ * @param {string} str - Half-width string
+ * @returns {string} Full-width string
  */
 function toDBC(str) {
-  let result = "";
+  let result = ''
   for (let i = 0; i < str.length; i++) {
-    code = str.charCodeAt(i);
+    const code = str.charCodeAt(i)
     if (code >= 33 && code <= 126) {
-      result += String.fromCharCode(str.charCodeAt(i) + 65248);
-    } else if (code == 32) {
-      result += String.fromCharCode(str.charCodeAt(i) + 12288 - 32);
+      result += String.fromCharCode(code + 65248)
+    } else if (code === 32) {
+      result += String.fromCharCode(code + 12288 - 32)
     } else {
-      result += str.charAt(i);
+      result += str.charAt(i)
     }
   }
-  return result;
+  return result
 }
 
 /**
- * 作用: 数字转化为大写金额
- * @param: { Number }  
- * @return { String } 
+ * Convert a number to Chinese uppercase currency format
+ * @param {number} n - Amount
+ * @returns {string} Chinese uppercase amount string
  */
 function digitUppercase(n) {
-    const fraction = ['角', '分'];
-    const digit = [
-        '零', '壹', '贰', '叁', '肆',
-        '伍', '陆', '柒', '捌', '玖'
-    ];
-    const unit = [
-        ['元', '万', '亿'],
-        ['', '拾', '佰', '仟']
-    ];
-    n = Math.abs(n);
-    let s = '';
-    for (let i = 0; i < fraction.length; i++) {
-        s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
+  const fraction = ['角', '分']
+  const digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
+  const unit = [
+    ['元', '万', '亿'],
+    ['', '拾', '佰', '仟'],
+  ]
+
+  n = Math.abs(n)
+  let s = ''
+  for (let i = 0; i < fraction.length; i++) {
+    s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '')
+  }
+  s = s || '整'
+  n = Math.floor(n)
+
+  for (let i = 0; i < unit[0].length && n > 0; i++) {
+    let p = ''
+    for (let j = 0; j < unit[1].length && n > 0; j++) {
+      p = digit[n % 10] + unit[1][j] + p
+      n = Math.floor(n / 10)
     }
-    s = s || '整';
-    n = Math.floor(n);
-    for (let i = 0; i < unit[0].length && n > 0; i++) {
-        let p = '';
-        for (let j = 0; j < unit[1].length && n > 0; j++) {
-            p = digit[n % 10] + unit[1][j] + p;
-            n = Math.floor(n / 10);
-        }
-        s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
-    }
-    return s.replace(/(零.)*零元/, '元')
-        .replace(/(零.)+/g, '零')
-        .replace(/^整$/, '零元整');
+    s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s
+  }
+
+  return s
+    .replace(/(零.)*零元/, '元')
+    .replace(/(零.)+/g, '零')
+    .replace(/^整$/, '零元整')
 }
 
+// ======================================= Validation ===================================================
+
 /**
- * 作用: 校验身份证号码
- * @param: { Number } 
- * @return { Boolean } 
+ * Check if a string is a valid Chinese ID card number
+ * @param {number|string} value - ID card number
+ * @returns {boolean}
  */
 function checkCardNo(value) {
-    let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
-    return reg.test(value);
+  return /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/.test(value)
 }
 
 /**
- * 作用: 校验是否包含中文
- * @param: { String } 
- * @return { Boolean } 
+ * Check if a string contains Chinese characters
+ * @param {string} value - Input string
+ * @returns {boolean}
  */
 function haveCNChars(value) {
-    return /[\u4e00-\u9fa5]/.test(value);
+  return /[\u4e00-\u9fa5]/.test(value)
 }
 
 /**
- * 作用: 校验是否为中国大陆的邮政编码
- * @param: { Number } 
- * @return { Boolean } 
+ * Check if a string is a valid Chinese postal code
+ * @param {number|string} value - Postal code
+ * @returns {boolean}
  */
 function isPostCode(value) {
-    return /^[1-9][0-9]{5}$/.test(value.toString());
+  return /^[1-9][0-9]{5}$/.test(value.toString())
 }
 
 /**
- * 作用: 校验是否为IPv6地址
- * @param: { String } 
- * @return { Boolean } 
+ * Check if a string is a valid IPv6 address
+ * @param {string} str - IPv6 address
+ * @returns {boolean}
  */
 function isIPv6(str) {
-     return Boolean(str.match(/:/g)
-        ?str.match(/:/g).length<=7:false && /::/.test(str)?/^([\da-f]{1,4}(:|::)){1,6}[\da-f]{1,4}$/i.test(str)
-        :/^([\da-f]{1,4}:){7}[\da-f]{1,4}$/i.test(str));
+  const hasColons = (str.match(/:/g) || []).length <= 7
+  if (!hasColons) return false
+
+  if (/::/.test(str)) {
+    return /^([\da-f]{1,4}(:|::)){1,6}[\da-f]{1,4}$/i.test(str)
+  }
+  return /^([\da-f]{1,4}:){7}[\da-f]{1,4}$/i.test(str)
 }
 
 /**
- * 作用: 校验是否为邮箱地址
- * @param: { String } 
- * @return { Boolean } 
+ * Check if a string is a valid email address
+ * @param {string} value - Email address
+ * @returns {boolean}
  */
 function isEmail(value) {
-     return /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value);
+  return /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value)
 }
 
 /**
- * 作用: 校验是否为中国大陆手机号
- * @param: { String } 
- * @return { Boolean } 
+ * Check if a string is a valid Chinese phone number
+ * @param {number|string} value - Phone number
+ * @returns {boolean}
  */
 function isTel(value) {
-     return /^1[3,4,5,6,7,8,9][0-9]{9}$/.test(value.toString());
+  return /^1[3,4,5,6,7,8,9][0-9]{9}$/.test(value.toString())
 }
 
 /**
- * 作用: 校验是否包含emoji表情
- * @param: { String } 
- * @return { Boolean } 
+ * Check if a string contains emoji characters
+ * @param {string} value - Input string
+ * @returns {boolean}
  */
 function isEmojiCharacter(value) {
-   value = String(value);
-    for (let i = 0; i < value.length; i++) {
-        const hs = value.charCodeAt(i);
-        if (0xd800 <= hs && hs <= 0xdbff) {
-            if (value.length > 1) {
-                const ls = value.charCodeAt(i + 1);
-                const uc = ((hs - 0xd800) * 0x400) + (ls - 0xdc00) + 0x10000;
-                if (0x1d000 <= uc && uc <= 0x1f77f) {
-                    return true;
-                }
-            }
-        } else if (value.length > 1) {
-            const ls = value.charCodeAt(i + 1);
-            if (ls == 0x20e3) {
-                return true;
-            }
-        } else {
-            if (0x2100 <= hs && hs <= 0x27ff) {
-                return true;
-            } else if (0x2B05 <= hs && hs <= 0x2b07) {
-                return true;
-            } else if (0x2934 <= hs && hs <= 0x2935) {
-                return true;
-            } else if (0x3297 <= hs && hs <= 0x3299) {
-                return true;
-            } else if (hs == 0xa9 || hs == 0xae || hs == 0x303d || hs == 0x3030
-                    || hs == 0x2b55 || hs == 0x2b1c || hs == 0x2b1b
-                    || hs == 0x2b50) {
-                return true;
-            }
-        }
+  value = String(value)
+  for (let i = 0; i < value.length; i++) {
+    const hs = value.charCodeAt(i)
+    if (hs >= 0xd800 && hs <= 0xdbff) {
+      if (value.length > 1) {
+        const ls = value.charCodeAt(i + 1)
+        const uc = (hs - 0xd800) * 0x400 + (ls - 0xdc00) + 0x10000
+        if (uc >= 0x1d000 && uc <= 0x1f77f) return true
+      }
+    } else {
+      if (
+        (hs >= 0x2100 && hs <= 0x27ff) ||
+        (hs >= 0x2b05 && hs <= 0x2b07) ||
+        (hs >= 0x2934 && hs <= 0x2935) ||
+        (hs >= 0x3297 && hs <= 0x3299) ||
+        [0xa9, 0xae, 0x303d, 0x3030, 0x2b55, 0x2b1c, 0x2b1b, 0x2b50].includes(hs)
+      ) {
+        return true
+      }
     }
-   return false;
+  }
+  return false
 }
 
-/**
- * 作用: 校验是否为中国大陆手机号
- * @param: { String } 
- * @return { Boolean } 
- */
-function isTel(value) {
-     return /^1[3,4,5,6,7,8,9][0-9]{9}$/.test(value.toString());
-}
+// ======================================= Scroll & Viewport ===========================================
 
 /**
- * 作用: 滚动到页面顶部
- * @param: { Null } 
- * @return { Null } 
+ * Smooth scroll to the top of the page
  */
 function scrollToTop() {
-  const height = document.documentElement.scrollTop || document.body.scrollTop;
+  const height = document.documentElement.scrollTop || document.body.scrollTop
   if (height > 0) {
-    window.requestAnimationFrame(scrollToTop);
-    window.scrollTo(0, height - height / 8);
+    window.requestAnimationFrame(scrollToTop)
+    window.scrollTo(0, height - height / 8)
   }
 }
 
 /**
- * 作用: 滚动到页面底部
- * @param: { Null } 
- * @return { Null } 
+ * Scroll to the bottom of the page
  */
 function scrollToBottom() {
-    window.scrollTo(0, document.documentElement.clientHeight);  
+  window.scrollTo(0, document.documentElement.clientHeight)
 }
 
 /**
- * 作用: 滚动到指定元素区域
- * @param: { Element } 
- * @return { Null } 
+ * Smooth scroll to a specific element
+ * @param {string} selector - CSS selector of the target element
  */
-function smoothScroll(element) {
-    document.querySelector(element).scrollIntoView({
-        behavior: 'smooth'
-    });
+function smoothScroll(selector) {
+  document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' })
 }
 
 /**
- * 作用: 获取可视窗口高度
- * @param: { Null } 
- * @return { String } 
+ * Get the viewport height
+ * @returns {number} Viewport height in pixels
  */
 function getClientHeight() {
-    let clientHeight = 0;
-    if (document.body.clientHeight && document.documentElement.clientHeight) {
-        clientHeight = (document.body.clientHeight < document.documentElement.clientHeight) ? document.body.clientHeight : document.documentElement.clientHeight;
-    }
-    else {
-        clientHeight = (document.body.clientHeight > document.documentElement.clientHeight) ? document.body.clientHeight : document.documentElement.clientHeight;
-    }
-    return clientHeight;
+  const body = document.body
+  const html = document.documentElement
+  return Math.min(body.clientHeight, html.clientHeight)
 }
 
 /**
- * 作用: 获取可视窗口宽度
- * @param: { Null } 
- * @return { String } 
+ * Get the viewport width
+ * @returns {number} Viewport width in pixels
  */
-function smoothScroll(element) {
-    return (document.compatMode == "BackCompat" ? document.body : document.documentElement).clientWidth;
+function getClientWidth() {
+  return (document.compatMode === 'BackCompat' ? document.body : document.documentElement).clientWidth
 }
 
 /**
- * 作用: 打开浏览器全屏
- * @param: { Null } 
- * @return { Null } 
+ * Request fullscreen for the document body
  */
-function smoothScroll(element) {
-    let element = document.body;
-    if (element.requestFullscreen) {
-      element.requestFullscreen()
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen()
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen()
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullScreen()
-    }
+function requestFullscreen() {
+  const el = document.body
+  const fn = el.requestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen || el.webkitRequestFullScreen
+  fn.call(el)
 }
 
 /**
- * 作用: 退出浏览器全屏
- * @param: { Null } 
- * @return { Null } 
+ * Exit fullscreen mode
  */
-function smoothScroll(element) {
-    if (document.exitFullscreen) {
-      document.exitFullscreen()
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen()
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen()
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen()
-    }
+function exitFullscreen() {
+  const fn =
+    document.exitFullscreen ||
+    document.msExitFullscreen ||
+    document.mozCancelFullScreen ||
+    document.webkitExitFullscreen
+  fn.call(document)
 }
 
-// ======================================= 本地存储 ==============================================
+// ======================================= Local Storage ================================================
+
 /**
- * 作用: 存储loalStorage
- * @param: { String }
- * @param: { String }  
- * @return { Null } 
+ * Set a value in localStorage
+ * @param {string} key - Storage key
+ * @param {*} value - Value to store
  */
-function loalStorageSet(key , value) {
-    if(!key) return;
-    if(typeof value !== 'string') {
-        value = JSON.stringify(value);
-    }
-    window.localStorage.setItem(key, value);
+function localStorageSet(key, value) {
+  if (!key) return
+  window.localStorage.setItem(key, typeof value !== 'string' ? JSON.stringify(value) : value)
 }
 
 /**
- * 作用: 获取localStorage
- * @param: { String } 
- * @return { String } 
+ * Get a value from localStorage
+ * @param {string} key - Storage key
+ * @returns {string|null} Stored value
  */
-function loalStorageGet(key) {
-    if(!key) return;
-    return window.localStorage.getItem(key);
+function localStorageGet(key) {
+  if (!key) return null
+  return window.localStorage.getItem(key)
 }
 
 /**
- * 作用: 删除localStorage
- * @param: { String } 
- * @return { Null } 
+ * Remove a value from localStorage
+ * @param {string} key - Storage key
  */
-function loalStorageRemove(key) {
-    if(!key) return;
-    window.localStorage.removeItem(key);
+function localStorageRemove(key) {
+  if (!key) return
+  window.localStorage.removeItem(key)
 }
